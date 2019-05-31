@@ -105,7 +105,9 @@ public class Mouse : MonoBehaviour
         {
             if (Input.GetMouseButtonUp(0) && DidUserClickLeftMouse(mouseDownPoint))
             {
-                DeselectGameObjectsIfSelected();
+                if(!shiftKeysDown()) { 
+                    DeselectGameObjectsIfSelected();
+                }
             }
 
         }
