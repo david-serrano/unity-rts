@@ -12,7 +12,12 @@ public class Unit : MonoBehaviour
 
     public bool isWalkable = true;
 
-    private void Update()
+    public void Awake()
+    {
+        //Physics.IgnoreLayerCollision(8, 8, true);
+    }
+
+    public void Update()
     {
         if (!selected)
         {

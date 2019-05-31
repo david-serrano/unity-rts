@@ -81,9 +81,9 @@ public class Mouse : MonoBehaviour
                         //2 middle
                         if (Input.GetMouseButtonDown(1))
                         {
+                            rightClickPoint = hit.point;
                             GameObject targetObject = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
                             targetObject.name = "Target Instantiated";
-                            rightClickPoint = hit.point;
                         }
                         else if (Input.GetMouseButtonUp(0) && DidUserClickLeftMouse(mouseDownPoint))
                         {
