@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class WorldCamera : MonoBehaviour
 {
+    
+ 
+//this value is used to further clamp the camera away from the edge.
+//Transform will not travel closer than nonPassibleBorderWidth from a terrain edge
 
     public struct BoxLimit
     {
@@ -12,6 +16,8 @@ public class WorldCamera : MonoBehaviour
         public float topLimit;
         public float bottomLimit;
     }
+
+    float terrainSizeFactor = 5f;
 
     public static BoxLimit cameraLimits = new BoxLimit();
     public static BoxLimit mouseScrollLimits = new BoxLimit();
@@ -38,6 +44,15 @@ public class WorldCamera : MonoBehaviour
         mouseScrollLimits.rightLimit = mouseBoundary;
         mouseScrollLimits.topLimit = mouseBoundary;
         mouseScrollLimits.bottomLimit = mouseBoundary;
+        
+        GameObject terrainMain = GameObject.Find("TerrainMain");
+        
+        var myTerrainTransform = terrainMain.transform;
+
+        cameraLimits.leftLimit = -myTerrainTransform.localScale.x * terrainSizeFactor;
+        cameraLimits.rightLimit = myTerrainTransform.localScale.x * terrainSizeFactor;
+        cameraLimits.topLimit = -myTerrainTransform.localScale.z * terrainSizeFactor;
+        cameraLimits.bottomLimit = myTerrainTransform.localScale.z * terrainSizeFactor;
     }
 
     void Update()
@@ -49,11 +64,11 @@ public class WorldCamera : MonoBehaviour
 
             if(isDesiredPositionOverBoundaries(cameraDesiredMove))
             {
-               // Debug.Log("desired move over boundaries - moving");
+                Debug.Log("desired move over boundaries - moving");
                 this.transform.Translate(cameraDesiredMove);
             } else
             {
-              //  Debug.Log("movement out of boundaries :(");
+                Debug.Log("movement out of boundaries :(");
             }
         } else
         {
@@ -111,14 +126,14 @@ public class WorldCamera : MonoBehaviour
 
         if(Input.GetKey(KeyCode.W))
         {
-            desiredZ = moveSpeed/2;
-            desiredY = moveSpeed/2;
+            desiredZ = moveSpeed;
+           desiredY = moveSpeed*3/4;
         }
 
         if (Input.GetKey(KeyCode.S))
         {
-            desiredZ = moveSpeed * -1/2;
-            desiredY = moveSpeed * -1/2;
+            desiredZ = -moveSpeed;
+            desiredY = -moveSpeed * 3/4;
         }
 
         if (Input.GetKey(KeyCode.A))
@@ -131,54 +146,23 @@ public class WorldCamera : MonoBehaviour
             desiredX = moveSpeed;
         }
 
-     /*   if(Input.mousePosition.x < mouseScrollLimits.leftLimit)
-        {
-            desiredX = moveSpeed * -1;
-        }
-
-        if (Input.mousePosition.x > (Screen.width - mouseScrollLimits.rightLimit))
-        {
-            desiredX = moveSpeed;
-        }
-
-        if (Input.mousePosition.y < mouseScrollLimits.bottomLimit)
-        {
-            desiredZ = moveSpeed * -1;
-        }
-
-        if (Input.mousePosition.y > (Screen.height - mouseScrollLimits.topLimit))
-        {
-            desiredZ = moveSpeed;
-        } */
-
-<<<<<<< HEAD
         return new Vector3(desiredX, desiredY, desiredZ);
-            //Vector3.ProjectOnPlane(new Vector3(0, 0, desiredZ), new Vector3(-45,0,0));
-=======
-        return Vector3.ProjectOnPlane(new Vector3(desiredX, 0, desiredZ), new Vector3(-35,0,0));
->>>>>>> 4b5aa4c3490dcbef303cb4ee58668b7882ec0ce1
+          
     }
 
     public bool isDesiredPositionOverBoundaries(Vector3 desiredPosition)
     {
-        bool overBoundaries = false;
-        if((this.transform.position.x + desiredPosition.x) < cameraLimits.leftLimit) {
-            overBoundaries = true;
-        }
+        bool overBoundaries = true;
+        float moveX = this.transform.position.x + desiredPosition.x;
+        float moveZ = this.transform.position.z + desiredPosition.z;
+       if (moveX < cameraLimits.leftLimit || moveX > cameraLimits.rightLimit) {
 
-        if ((this.transform.position.x + desiredPosition.x) > cameraLimits.rightLimit)
-        {
-            overBoundaries = true;
+                overBoundaries = false;
         }
-
-        if ((this.transform.position.z + desiredPosition.z) > cameraLimits.topLimit)
+        if (moveZ < cameraLimits.topLimit - 2*terrainSizeFactor || moveZ > cameraLimits.bottomLimit - 4*terrainSizeFactor)
         {
-            overBoundaries = true;
-        }
 
-        if ((this.transform.position.z + desiredPosition.z) < cameraLimits.bottomLimit)
-        {
-            overBoundaries = true;
+            overBoundaries = false;
         }
 
         return overBoundaries;
