@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Mouse : MonoBehaviour
+public class MouseTest : MonoBehaviour
 {
     RaycastHit hit;
     public GameObject target;

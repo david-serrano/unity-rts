@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MousePoint : MonoBehaviour
+public class Mouse : MonoBehaviour
 {
     RaycastHit hit;
     public GameObject target;
@@ -30,7 +30,7 @@ public class MousePoint : MonoBehaviour
                 mouseDownPoint = hit.point;
             }
 
-            Debug.Log("Hit: " + hit.collider.name + "x: " + hit.point.x + " y: " + hit.point.y + " z: " + hit.point.z);
+         //ssssssssssssssssssssssssssss   Debug.Log("Hit: " + hit.collider.name + "x: " + hit.point.x + " y: " + hit.point.y + " z: " + hit.point.z);
             switch (hit.collider.name)
             {
                 case "TerrainMain":
@@ -49,7 +49,7 @@ public class MousePoint : MonoBehaviour
 
                     break;
                 default:
-                    if(Input.GetMouseButtonUp(0) && DidUserClickLeftMouse(mouseDownPoint)) {
+                    if(Input.GetMouseButtonDown(0) && DidUserClickLeftMouse(mouseDownPoint)) {
                         if(hit.collider.transform.Find("Selected"))
                         {
                             Debug.Log("Found a unit!");
@@ -72,11 +72,6 @@ public class MousePoint : MonoBehaviour
                         }
 
                     }
-                   /* if (Input.GetMouseButtonDown(1))
-                    {
-                        Projector selected = hit.collider.gameObject.GetComponentInChildren<Projector>();
-                        selected.enabled = true;
-                    }*/
                     break;
             }
         }
