@@ -148,7 +148,7 @@ public class WorldCamera : MonoBehaviour
             desiredZ = moveSpeed;
         }
 
-        return Vector3.ProjectOnPlane(new Vector3(desiredX, 0, desiredZ), new Vector3(-45,0,0));
+        return Vector3.ProjectOnPlane(new Vector3(desiredX, 0, desiredZ), new Vector3(-35,0,0));
     }
 
     public bool isDesiredPositionOverBoundaries(Vector3 desiredPosition)

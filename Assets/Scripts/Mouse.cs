@@ -8,6 +8,7 @@ public class Mouse : MonoBehaviour
     public GameObject target;
     public static GameObject currentlySelectedTarget;
     private Vector3 mouseDownPoint;
+    public static ArrayList currentlySelectedUnits = new ArrayList();
 
     // Start is called before the first frame update
     void Start()
@@ -30,7 +31,7 @@ public class Mouse : MonoBehaviour
                 mouseDownPoint = hit.point;
             }
 
-         //ssssssssssssssssssssssssssss   Debug.Log("Hit: " + hit.collider.name + "x: " + hit.point.x + " y: " + hit.point.y + " z: " + hit.point.z);
+            // Debug.Log("Hit: " + hit.collider.name + "x: " + hit.point.x + " y: " + hit.point.y + " z: " + hit.point.z);
             switch (hit.collider.name)
             {
                 case "TerrainMain":
@@ -44,31 +45,56 @@ public class Mouse : MonoBehaviour
                     }
                     else if (Input.GetMouseButtonUp(0) && DidUserClickLeftMouse(mouseDownPoint))
                     {
-                        DeselectGameObjectIfSelected();
+                        if(!shiftKeysDown()) {
+                            DeselectGameObjectsIfSelected();
+                        }
                     }
 
                     break;
                 default:
-                    if(Input.GetMouseButtonDown(0) && DidUserClickLeftMouse(mouseDownPoint)) {
-                        if(hit.collider.transform.Find("Selected"))
+                    if (Input.GetMouseButtonDown(0) && DidUserClickLeftMouse(mouseDownPoint))
+                    {
+                        if (hit.collider.transform.Find("Selected"))
                         {
                             Debug.Log("Found a unit!");
 
-                            if (currentlySelectedTarget != hit.collider.gameObject)
+                            if (!unitAlreadyInCurrentlySelectedUnits(hit.collider.gameObject))
                             {
+                                if (!shiftKeysDown())
+                                {
+                                    DeselectGameObjectsIfSelected();
+                                }
+
                                 GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
                                 selectedObject.SetActive(true);
 
-                                if(currentlySelectedTarget != null)
+                                currentlySelectedUnits.Add(hit.collider.gameObject);
+
+                            }
+                            else
+                            {
+                                if (shiftKeysDown())
                                 {
-                                    currentlySelectedTarget.transform.Find("Selected").gameObject.SetActive(false);
+                                    removeUnitFromCurrentlySelectedUnits(hit.collider.gameObject);
+                                }
+                                else
+                                {
+                                    DeselectGameObjectsIfSelected();
+
+                                    GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
+                                    selectedObject.SetActive(true);
+
+                                    currentlySelectedUnits.Add(hit.collider.gameObject);
                                 }
 
-                                currentlySelectedTarget = hit.collider.gameObject;
                             }
-                        } else
+                        }
+                        else
                         {
-                            DeselectGameObjectIfSelected();
+                            if (!shiftKeysDown())
+                            {
+                                DeselectGameObjectsIfSelected();
+                            }
                         }
 
                     }
@@ -77,10 +103,11 @@ public class Mouse : MonoBehaviour
         }
         else
         {
-            if (Input.GetMouseButtonUp(0) && DidUserClickLeftMouse(mouseDownPoint)) {
-                DeselectGameObjectIfSelected();
+            if (Input.GetMouseButtonUp(0) && DidUserClickLeftMouse(mouseDownPoint))
+            {
+                DeselectGameObjectsIfSelected();
             }
-        
+
         }
 
         Debug.DrawRay(ray.origin, ray.direction * Mathf.Infinity, Color.yellow);
@@ -95,19 +122,73 @@ public class Mouse : MonoBehaviour
             (mouseDownPoint.x < hitPoint.x + clickZone && mouseDownPoint.x > hitPoint.x - clickZone) &&
             (mouseDownPoint.y < hitPoint.y + clickZone && mouseDownPoint.y > hitPoint.y - clickZone) &&
             (mouseDownPoint.z < hitPoint.z + clickZone && mouseDownPoint.z > hitPoint.z - clickZone)
-        ) {
+        )
+        {
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
 
-    public static void DeselectGameObjectIfSelected()
+    public static void DeselectGameObjectsIfSelected()
     {
-        if(currentlySelectedTarget != null)
+        if (currentlySelectedUnits.Count > 0)
         {
-            currentlySelectedTarget.transform.Find("Selected").gameObject.SetActive(false);
-            currentlySelectedTarget = null;
+            for (int i = 0; i < currentlySelectedUnits.Count; i++)
+            {
+                GameObject unitAtIndex = currentlySelectedUnits[i] as GameObject;
+                unitAtIndex.transform.Find("Selected").gameObject.SetActive(false);
+            }
+            currentlySelectedUnits.Clear();
+        }
+    }
+
+    public static bool unitAlreadyInCurrentlySelectedUnits(GameObject unit)
+    {
+        if (currentlySelectedUnits.Count > 0)
+        {
+            for (int i = 0; i < currentlySelectedUnits.Count; i++)
+            {
+                GameObject unitAtIndex = currentlySelectedUnits[i] as GameObject;
+                if (unitAtIndex == unit)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void removeUnitFromCurrentlySelectedUnits(GameObject unit)
+    {
+        if (currentlySelectedUnits.Count > 0)
+        {
+            for (int i = 0; i < currentlySelectedUnits.Count; i++)
+            {
+                GameObject unitAtIndex = currentlySelectedUnits[i] as GameObject;
+                if (unitAtIndex == unit)
+                {
+                    currentlySelectedUnits.RemoveAt(i);
+                    unitAtIndex.transform.Find("Selected").gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    public static bool shiftKeysDown()
+    {
+        if(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            return true;
+        } else
+        {
+            return false;
         }
     }
 }
