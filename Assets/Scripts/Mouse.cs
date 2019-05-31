@@ -7,6 +7,10 @@ public class Mouse : MonoBehaviour
     RaycastHit hit;
     public GameObject target;
     public static ArrayList currentlySelectedUnits = new ArrayList();
+    public static ArrayList unitsOnScreen = new ArrayList();
+    public static ArrayList unitsInDrag = new ArrayList();
+    private bool finishedDragOnThisFrame;
+
     public static bool userIsDragging;
     private static float timeLimitBeforeDeclareDrag = 1f;
     private static float timeLeftBeforeDeclareDrag;
@@ -17,6 +21,15 @@ public class Mouse : MonoBehaviour
     private static Vector3 mouseDownPoint;
     public static Vector3 mouseUpPoint;
     public static Vector3 currentMousePoint; //in world space
+
+    //GUI
+    private float boxWidth;
+    private float boxHeight;
+    private float boxLeft;
+    private float boxTop;
+
+    private Vector2 boxStart;
+    private Vector2 boxFinish;
 
     private void Awake()
     {
@@ -50,7 +63,7 @@ public class Mouse : MonoBehaviour
 
                 //GUI goes here
                 if (userIsDragging) {
-                    Debug.Log("User is dragging!");
+                 //   Debug.Log("User is dragging!");
                 }
             } else  if (Input.GetMouseButtonUp(0))
             {
@@ -117,7 +130,6 @@ public class Mouse : MonoBehaviour
 
                                         currentlySelectedUnits.Add(hit.collider.gameObject);
                                     }
-
                                 }
                             }
                             else
@@ -146,20 +158,53 @@ public class Mouse : MonoBehaviour
 
         Debug.DrawRay(ray.origin, ray.direction * 1000, Color.yellow);
 
+     
+        if(userIsDragging)
+        {
+            //update GUI variables once per update
+            boxWidth = Camera.main.WorldToScreenPoint(mouseDownPoint).x - Camera.main.WorldToScreenPoint(currentMousePoint).x;
+            boxHeight = Camera.main.WorldToScreenPoint(mouseDownPoint).y - Camera.main.WorldToScreenPoint(currentMousePoint).y;
+
+            boxLeft = Input.mousePosition.x;
+            boxTop = Screen.height - Input.mousePosition.y - boxHeight;
+
+            if (FloatToBool(boxWidth))
+            {
+                if(FloatToBool(boxHeight))
+                {
+                    boxStart = new Vector2(Input.mousePosition.x, Input.mousePosition.y + boxHeight);
+                } else
+                {
+                    boxStart = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+                }
+            } else if (!FloatToBool(boxWidth))
+            {
+                if (FloatToBool(boxHeight))
+                {   
+                    boxStart = new Vector2(Input.mousePosition.x + boxWidth, Input.mousePosition.y + boxHeight);
+                } else
+                {
+                    boxStart = new Vector2(Input.mousePosition.x + boxWidth, Input.mousePosition.y);
+                }
+            }
+
+            boxFinish = new Vector2(
+                      boxStart.x + unsigned(boxWidth),
+                      boxStart.y - unsigned(boxHeight)
+                  );
+        }
+     
+        Debug.Log(boxStart + "," + boxFinish);
     }
 
-    private void OnGUI()
+    private void LateUpdate()
     {
-        //box width, height, top, left
-        if (userIsDragging) {
-            float boxWidth = Camera.main.WorldToScreenPoint(mouseDownPoint).x - Camera.main.WorldToScreenPoint(currentMousePoint).x;
-            float boxHeight = Camera.main.WorldToScreenPoint(mouseDownPoint).y - Camera.main.WorldToScreenPoint(currentMousePoint).y;
+        Debug.Log(unitsOnScreen.Count);
+    }
 
-            float boxLeft = Input.mousePosition.x;
-            float boxTop = Screen.height - Input.mousePosition.y - boxHeight;
-
-            
-
+    void OnGUI()
+    {
+        if (userIsDragging) {   
             GUI.Box(new Rect(boxLeft, boxTop, boxWidth, boxHeight), "", mouseDragSkin);
         }
     }
@@ -239,6 +284,30 @@ public class Mouse : MonoBehaviour
         }
     }
 
+    public static void removeUnitFromOnScreen(GameObject unit)
+    {
+        for(int i =0; i< unitsOnScreen.Count; i++)
+        {
+            GameObject unitAtIndex = unitsOnScreen[i] as GameObject;
+            if(unit == unitAtIndex)
+            {
+                unitsOnScreen.RemoveAt(i);
+                unitAtIndex.GetComponent<Unit>().onScreen = false;
+                break;
+            }
+        }
+    }
+
+    public static bool unitWithinScreenSpace(Vector2 unitScreenPos)
+    {
+        if((unitScreenPos.x < Screen.width && unitScreenPos.y < Screen.height) &&
+            (unitScreenPos.x > 0f && unitScreenPos.y > 0f))
+        {
+            return true;
+        }
+        return false;
+    }
+
     public static bool shiftKeysDown()
     {
         if(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
@@ -248,5 +317,23 @@ public class Mouse : MonoBehaviour
         {
             return false;
         }
+    }
+
+    public static float unsigned(float val)
+    {
+        if(val < 0f)
+        {
+            val *= -1;
+        }
+        return val;
+    }
+
+    public static bool FloatToBool(float f)
+    {
+        if(f < 0f)
+        {
+            return false;
+        }
+        return true;
     }
 }
