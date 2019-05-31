@@ -9,7 +9,10 @@ public class Mouse : MonoBehaviour
     public static ArrayList currentlySelectedUnits = new ArrayList();
     public static ArrayList unitsOnScreen = new ArrayList();
     public static ArrayList unitsInDrag = new ArrayList();
+
+    public static Vector3 rightClickPoint;
     private bool finishedDragOnThisFrame;
+    private bool startedDrag;
 
     public static bool userIsDragging;
     private static float timeLimitBeforeDeclareDrag = 1f;
@@ -43,10 +46,7 @@ public class Mouse : MonoBehaviour
                 mouseDownPoint = hit.point;
                 timeLeftBeforeDeclareDrag = timeLimitBeforeDeclareDrag;
                 mouseDragStart = Input.mousePosition;
-
-                if(!Common.shiftKeysDown()) {
-                    DeselectGameObjectsIfSelected();
-                }
+                startedDrag = true;
             }
             else if (Input.GetMouseButton(0))
             {
@@ -83,6 +83,7 @@ public class Mouse : MonoBehaviour
                         {
                             GameObject targetObject = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
                             targetObject.name = "Target Instantiated";
+                            rightClickPoint = hit.point;
                         }
                         else if (Input.GetMouseButtonUp(0) && DidUserClickLeftMouse(mouseDownPoint))
                         {
@@ -109,6 +110,7 @@ public class Mouse : MonoBehaviour
                                     selectedObject.SetActive(true);
 
                                     currentlySelectedUnits.Add(hit.collider.gameObject);
+                                    hit.collider.gameObject.GetComponent<Unit>().selected = true;
                                 }
                                 else
                                 {
@@ -149,6 +151,12 @@ public class Mouse : MonoBehaviour
                 }
             }
 
+        }
+
+        if(!Common.shiftKeysDown() && startedDrag && userIsDragging)
+        {
+            DeselectGameObjectsIfSelected();
+            startedDrag = false;
         }
 
         Debug.DrawRay(ray.origin, ray.direction * 1000, Color.yellow);

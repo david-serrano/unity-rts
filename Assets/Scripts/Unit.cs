@@ -10,6 +10,8 @@ public class Unit : MonoBehaviour
     public bool onScreen;
     public bool selected = false;
 
+    public bool isWalkable = true;
+
     private void Update()
     {
         if (!selected)
