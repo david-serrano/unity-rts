@@ -126,6 +126,7 @@ public class Mouse : MonoBehaviour
                                         selectedObject.SetActive(true);
 
                                         currentlySelectedUnits.Add(hit.collider.gameObject);
+                                        hit.collider.gameObject.GetComponent<Unit>().selected = true;
                                     }
                                 }
                             }
