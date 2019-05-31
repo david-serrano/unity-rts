@@ -98,6 +98,7 @@ public class WorldCamera : MonoBehaviour
     {
         float moveSpeed = 0f;
         float desiredX = 0f;
+        float desiredY = 0f;
         float desiredZ = 0f;
 
         if(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
@@ -110,12 +111,14 @@ public class WorldCamera : MonoBehaviour
 
         if(Input.GetKey(KeyCode.W))
         {
-            desiredZ = moveSpeed;
+            desiredZ = moveSpeed/2;
+            desiredY = moveSpeed/2;
         }
 
         if (Input.GetKey(KeyCode.S))
         {
-            desiredZ = moveSpeed * -1;
+            desiredZ = moveSpeed * -1/2;
+            desiredY = moveSpeed * -1/2;
         }
 
         if (Input.GetKey(KeyCode.A))
@@ -128,7 +131,7 @@ public class WorldCamera : MonoBehaviour
             desiredX = moveSpeed;
         }
 
-        if(Input.mousePosition.x < mouseScrollLimits.leftLimit)
+     /*   if(Input.mousePosition.x < mouseScrollLimits.leftLimit)
         {
             desiredX = moveSpeed * -1;
         }
@@ -146,9 +149,10 @@ public class WorldCamera : MonoBehaviour
         if (Input.mousePosition.y > (Screen.height - mouseScrollLimits.topLimit))
         {
             desiredZ = moveSpeed;
-        }
+        } */
 
-        return Vector3.ProjectOnPlane(new Vector3(desiredX, 0, desiredZ), new Vector3(-45,0,0));
+        return new Vector3(desiredX, desiredY, desiredZ);
+            //Vector3.ProjectOnPlane(new Vector3(0, 0, desiredZ), new Vector3(-45,0,0));
     }
 
     public bool isDesiredPositionOverBoundaries(Vector3 desiredPosition)
