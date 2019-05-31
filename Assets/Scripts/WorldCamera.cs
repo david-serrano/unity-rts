@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class WorldCamera : MonoBehaviour
 {
+    
+ 
+//this value is used to further clamp the camera away from the edge.
+//Transform will not travel closer than nonPassibleBorderWidth from a terrain edge
 
     public struct BoxLimit
     {
@@ -12,6 +16,8 @@ public class WorldCamera : MonoBehaviour
         public float topLimit;
         public float bottomLimit;
     }
+
+    float terrainSizeFactor = 5f;
 
     public static BoxLimit cameraLimits = new BoxLimit();
     public static BoxLimit mouseScrollLimits = new BoxLimit();
@@ -38,6 +44,15 @@ public class WorldCamera : MonoBehaviour
         mouseScrollLimits.rightLimit = mouseBoundary;
         mouseScrollLimits.topLimit = mouseBoundary;
         mouseScrollLimits.bottomLimit = mouseBoundary;
+        
+        GameObject terrainMain = GameObject.Find("TerrainMain");
+        
+        var myTerrainTransform = terrainMain.transform;
+
+        cameraLimits.leftLimit = -myTerrainTransform.localScale.x * terrainSizeFactor;
+        cameraLimits.rightLimit = myTerrainTransform.localScale.x * terrainSizeFactor;
+        cameraLimits.topLimit = -myTerrainTransform.localScale.z * terrainSizeFactor;
+        cameraLimits.bottomLimit = myTerrainTransform.localScale.z * terrainSizeFactor;
     }
 
     void Update()
@@ -49,12 +64,8 @@ public class WorldCamera : MonoBehaviour
 
             if(isDesiredPositionOverBoundaries(cameraDesiredMove))
             {
-               // Debug.Log("desired move over boundaries - moving");
                 this.transform.Translate(cameraDesiredMove);
-            } else
-            {
-              //  Debug.Log("movement out of boundaries :(");
-            }
+            } 
         } else
         {
            // Debug.Log("no input detected");
@@ -111,14 +122,14 @@ public class WorldCamera : MonoBehaviour
 
         if(Input.GetKey(KeyCode.W))
         {
-            desiredZ = moveSpeed/2;
-            desiredY = moveSpeed/2;
+            desiredZ = moveSpeed;
+           desiredY = moveSpeed*3/4;
         }
 
         if (Input.GetKey(KeyCode.S))
         {
-            desiredZ = moveSpeed * -1/2;
-            desiredY = moveSpeed * -1/2;
+            desiredZ = -moveSpeed;
+            desiredY = -moveSpeed * 3/4;
         }
 
         if (Input.GetKey(KeyCode.A))
@@ -130,6 +141,7 @@ public class WorldCamera : MonoBehaviour
         {
             desiredX = moveSpeed;
         }
+
 
      /*   if(Input.mousePosition.x < mouseScrollLimits.leftLimit)
         {
@@ -150,31 +162,24 @@ public class WorldCamera : MonoBehaviour
         {
             desiredZ = moveSpeed;
         } */
-
+        
         return new Vector3(desiredX, desiredY, desiredZ);
           
     }
 
     public bool isDesiredPositionOverBoundaries(Vector3 desiredPosition)
     {
-        bool overBoundaries = false;
-        if((this.transform.position.x + desiredPosition.x) < cameraLimits.leftLimit) {
-            overBoundaries = true;
-        }
+        bool overBoundaries = true;
+        float moveX = this.transform.position.x + desiredPosition.x;
+        float moveZ = this.transform.position.z + desiredPosition.z;
+       if (moveX < cameraLimits.leftLimit || moveX > cameraLimits.rightLimit) {
 
-        if ((this.transform.position.x + desiredPosition.x) > cameraLimits.rightLimit)
-        {
-            overBoundaries = true;
+                overBoundaries = false;
         }
-
-        if ((this.transform.position.z + desiredPosition.z) > cameraLimits.topLimit)
+        if (moveZ < cameraLimits.topLimit - 2*terrainSizeFactor || moveZ > cameraLimits.bottomLimit - 4*terrainSizeFactor)
         {
-            overBoundaries = true;
-        }
 
-        if ((this.transform.position.z + desiredPosition.z) < cameraLimits.bottomLimit)
-        {
-            overBoundaries = true;
+            overBoundaries = false;
         }
 
         return overBoundaries;
