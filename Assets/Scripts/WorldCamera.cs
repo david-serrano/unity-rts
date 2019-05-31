@@ -64,12 +64,8 @@ public class WorldCamera : MonoBehaviour
 
             if(isDesiredPositionOverBoundaries(cameraDesiredMove))
             {
-                Debug.Log("desired move over boundaries - moving");
                 this.transform.Translate(cameraDesiredMove);
-            } else
-            {
-                Debug.Log("movement out of boundaries :(");
-            }
+            } 
         } else
         {
            // Debug.Log("no input detected");
@@ -146,6 +142,27 @@ public class WorldCamera : MonoBehaviour
             desiredX = moveSpeed;
         }
 
+
+     /*   if(Input.mousePosition.x < mouseScrollLimits.leftLimit)
+        {
+            desiredX = moveSpeed * -1;
+        }
+
+        if (Input.mousePosition.x > (Screen.width - mouseScrollLimits.rightLimit))
+        {
+            desiredX = moveSpeed;
+        }
+
+        if (Input.mousePosition.y < mouseScrollLimits.bottomLimit)
+        {
+            desiredZ = moveSpeed * -1;
+        }
+
+        if (Input.mousePosition.y > (Screen.height - mouseScrollLimits.topLimit))
+        {
+            desiredZ = moveSpeed;
+        } */
+        
         return new Vector3(desiredX, desiredY, desiredZ);
           
     }
