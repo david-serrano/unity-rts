@@ -29,6 +29,7 @@ public class UnitPath : MonoBehaviour
         {
             if(Input.GetMouseButtonDown(1))
             {
+                EventController.addEvent("Unit moving!");
                 seeker.StartPath(transform.position, Mouse.rightClickPoint, OnPathComplete);
             }
         }

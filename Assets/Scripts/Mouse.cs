@@ -111,6 +111,7 @@ public class Mouse : MonoBehaviour
 
                                     currentlySelectedUnits.Add(hit.collider.gameObject);
                                     hit.collider.gameObject.GetComponent<Unit>().selected = true;
+                                    EventController.addEvent("Unit selected");
                                 }
                                 else
                                 {
@@ -127,6 +128,7 @@ public class Mouse : MonoBehaviour
 
                                         currentlySelectedUnits.Add(hit.collider.gameObject);
                                         hit.collider.gameObject.GetComponent<Unit>().selected = true;
+                                        EventController.addEvent("Unit selected");
                                     }
                                 }
                             }
