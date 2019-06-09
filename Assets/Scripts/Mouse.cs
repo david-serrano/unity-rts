@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Mouse : MonoBehaviour
 {
@@ -32,6 +33,16 @@ public class Mouse : MonoBehaviour
 
     private static Vector2 boxFinish;
     private static Vector2 boxStart;
+
+    private GameObject canvas;
+    private GameObject panel;
+
+    private void Awake()
+    {
+        canvas = GameObject.Find("Canvas");
+        panel = GameObject.Find("SchoolDetails");
+        panel.SetActive(false);
+    }
 
     // Update is called once per frame
     void Update()
@@ -100,13 +111,16 @@ public class Mouse : MonoBehaviour
                             GameObject clickedObject = hit.collider.gameObject;
                             if (clickedObject.GetComponent<Unit>())
                             {
-                                if (clickedObject.GetComponent<SchoolController>() != null && clickedObject.GetComponent<SchoolController>().getPurchaseButtonVisible())
+                                SchoolController controller = null;
+                                if (clickedObject.GetComponent<SchoolController>() != null)
                                 {
-                                    break;
+                                    controller = clickedObject.GetComponent<SchoolController>();
+                                    if (controller.getPurchaseButtonVisible())
+                                    {
+                                        break;
+                                    }
                                 }
                            
-                               // if (hit.collider is SphereCollider || hit.collider is CapsuleCollider)
-                              //  {
                                     if (!unitAlreadyInCurrentlySelectedUnits(clickedObject))
                                     {
                                         if (!Common.shiftKeysDown())
@@ -114,12 +128,23 @@ public class Mouse : MonoBehaviour
                                             DeselectGameObjectsIfSelected();
                                         }
 
-                                        GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
+                                        selectGameObject(hit.collider.transform, clickedObject);
+                                    if(controller != null && controller.getIsPurchased())
+                                    {
+                                       if(panel!= null)
+                                        {
+                                            panel.GetComponentInChildren<Text>().text = "Summary for this school";
+                                            panel.GetComponentInChildren<Button>().onClick.AddListener(closePanel);
+                                            panel.SetActive(true);
+                                        }
+                                    }
+
+                                       /* GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
                                         selectedObject.SetActive(true);
 
                                         currentlySelectedUnits.Add(clickedObject);
                                         hit.collider.gameObject.GetComponent<Unit>().selected = true;
-                                        EventController.addEvent("Unit selected");
+                                        EventController.addEvent("Unit selected");*/
                                     }
                                     else
                                     {
@@ -130,13 +155,14 @@ public class Mouse : MonoBehaviour
                                         else
                                         {
                                             DeselectGameObjectsIfSelected();
+                                            selectGameObject(hit.collider.transform, clickedObject);
 
-                                            GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
+                                       /* GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
                                             selectedObject.SetActive(true);
 
                                             currentlySelectedUnits.Add(clickedObject);
                                             hit.collider.gameObject.GetComponent<Unit>().selected = true;
-                                            EventController.addEvent("Unit selected");
+                                            EventController.addEvent("Unit selected");*/
                                         }
                                     }
                                // }
@@ -216,6 +242,24 @@ public class Mouse : MonoBehaviour
         }
      
       // Debug.Log(boxStart + "," + boxFinish);
+    }
+
+    private void closePanel()
+    {
+        if(panel !=null)
+        {
+            panel.SetActive(false);
+        }
+    }
+
+    private void selectGameObject(Transform transform, GameObject clickedObject)
+    {
+        GameObject selectedObject = transform.Find("Selected").gameObject;
+        selectedObject.SetActive(true);
+
+        currentlySelectedUnits.Add(clickedObject);
+        hit.collider.gameObject.GetComponent<Unit>().selected = true;
+        EventController.addEvent("Unit selected");
     }
 
     private void LateUpdate()

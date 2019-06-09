@@ -71,6 +71,11 @@ public class SchoolController : MonoBehaviour
         }
     }
 
+    public bool getIsPurchased()
+    {
+        return isPurchased;
+    }
+
     public bool getPurchaseButtonVisible()
     {
         return purchaseButtonVisible;
