@@ -99,29 +99,19 @@ public class Mouse : MonoBehaviour
                         {
                             if (hit.collider.gameObject.GetComponent<Unit>())
                             {
-                                if (!unitAlreadyInCurrentlySelectedUnits(hit.collider.gameObject))
+                                if (hit.collider is BoxCollider)
                                 {
-                                    if (!Common.shiftKeysDown())
-                                    {
-                                        DeselectGameObjectsIfSelected();
-                                    }
-
-                                    GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
-                                    selectedObject.SetActive(true);
-
-                                    currentlySelectedUnits.Add(hit.collider.gameObject);
-                                    hit.collider.gameObject.GetComponent<Unit>().selected = true;
-                                    EventController.addEvent("Unit selected");
+                                    break;
                                 }
-                                else
-                                {
-                                    if (Common.shiftKeysDown())
+                           
+                               // if (hit.collider is SphereCollider || hit.collider is CapsuleCollider)
+                              //  {
+                                    if (!unitAlreadyInCurrentlySelectedUnits(hit.collider.gameObject))
                                     {
-                                        removeUnitFromCurrentlySelectedUnits(hit.collider.gameObject);
-                                    }
-                                    else
-                                    {
-                                        DeselectGameObjectsIfSelected();
+                                        if (!Common.shiftKeysDown())
+                                        {
+                                            DeselectGameObjectsIfSelected();
+                                        }
 
                                         GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
                                         selectedObject.SetActive(true);
@@ -130,7 +120,25 @@ public class Mouse : MonoBehaviour
                                         hit.collider.gameObject.GetComponent<Unit>().selected = true;
                                         EventController.addEvent("Unit selected");
                                     }
-                                }
+                                    else
+                                    {
+                                        if (Common.shiftKeysDown())
+                                        {
+                                            removeUnitFromCurrentlySelectedUnits(hit.collider.gameObject);
+                                        }
+                                        else
+                                        {
+                                            DeselectGameObjectsIfSelected();
+
+                                            GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
+                                            selectedObject.SetActive(true);
+
+                                            currentlySelectedUnits.Add(hit.collider.gameObject);
+                                            hit.collider.gameObject.GetComponent<Unit>().selected = true;
+                                            EventController.addEvent("Unit selected");
+                                        }
+                                    }
+                               // }
                             }
                             else
                             {
@@ -139,8 +147,14 @@ public class Mouse : MonoBehaviour
                                     DeselectGameObjectsIfSelected();
                                 }
                             }
-
+                            
+                        } else if (Input.GetMouseButtonDown(1))
+                        {
+                            rightClickPoint = hit.point;
+                            GameObject targetObject = Instantiate(target, hit.point, Quaternion.identity) as GameObject;
+                            targetObject.name = "Target Instantiated";
                         }
+                        
                         break;
                 }
             }

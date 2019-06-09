@@ -25,8 +25,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3434996630024481522}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalPosition: {x: 0, y: 0.097, z: 0}
+  m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_Children: []
   m_Father: {fileID: 3434996630585390796}
   m_RootOrder: 0
@@ -40,16 +40,16 @@ Projector:
   m_GameObject: {fileID: 3434996630024481522}
   m_Enabled: 1
   serializedVersion: 2
-  m_NearClipPlane: 1.2
-  m_FarClipPlane: 2
-  m_FieldOfView: 20
-  m_AspectRatio: 1
+  m_NearClipPlane: 0.01
+  m_FarClipPlane: 0.02
+  m_FieldOfView: 0.5
+  m_AspectRatio: 0.00000001
   m_Orthographic: 0
-  m_OrthographicSize: 2
+  m_OrthographicSize: 0.00000001
   m_Material: {fileID: 2100000, guid: 0da5fbc9945418a4a9ec7d496bcc93e8, type: 2}
   m_IgnoreLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 512
 --- !u!1 &3434996630585390784
 GameObject:
   m_ObjectHideFlags: 0
@@ -67,7 +67,7 @@ GameObject:
   - component: {fileID: 820511605}
   - component: {fileID: 820511607}
   - component: {fileID: 820511608}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: Character
   m_TagString: Untagged
   m_Icon: {fileID: 0}
