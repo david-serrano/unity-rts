@@ -97,16 +97,17 @@ public class Mouse : MonoBehaviour
                     default:
                         if (Input.GetMouseButtonDown(0) && DidUserClickLeftMouse(mouseDownPoint))
                         {
-                            if (hit.collider.gameObject.GetComponent<Unit>())
+                            GameObject clickedObject = hit.collider.gameObject;
+                            if (clickedObject.GetComponent<Unit>())
                             {
-                                if (hit.collider is BoxCollider)
+                                if (clickedObject.GetComponent<SchoolController>() != null && clickedObject.GetComponent<SchoolController>().getPurchaseButtonVisible())
                                 {
                                     break;
                                 }
                            
                                // if (hit.collider is SphereCollider || hit.collider is CapsuleCollider)
                               //  {
-                                    if (!unitAlreadyInCurrentlySelectedUnits(hit.collider.gameObject))
+                                    if (!unitAlreadyInCurrentlySelectedUnits(clickedObject))
                                     {
                                         if (!Common.shiftKeysDown())
                                         {
@@ -116,7 +117,7 @@ public class Mouse : MonoBehaviour
                                         GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
                                         selectedObject.SetActive(true);
 
-                                        currentlySelectedUnits.Add(hit.collider.gameObject);
+                                        currentlySelectedUnits.Add(clickedObject);
                                         hit.collider.gameObject.GetComponent<Unit>().selected = true;
                                         EventController.addEvent("Unit selected");
                                     }
@@ -124,7 +125,7 @@ public class Mouse : MonoBehaviour
                                     {
                                         if (Common.shiftKeysDown())
                                         {
-                                            removeUnitFromCurrentlySelectedUnits(hit.collider.gameObject);
+                                            removeUnitFromCurrentlySelectedUnits(clickedObject);
                                         }
                                         else
                                         {
@@ -133,7 +134,7 @@ public class Mouse : MonoBehaviour
                                             GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
                                             selectedObject.SetActive(true);
 
-                                            currentlySelectedUnits.Add(hit.collider.gameObject);
+                                            currentlySelectedUnits.Add(clickedObject);
                                             hit.collider.gameObject.GetComponent<Unit>().selected = true;
                                             EventController.addEvent("Unit selected");
                                         }

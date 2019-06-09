@@ -17,16 +17,30 @@ public class SchoolController : MonoBehaviour
     public int numberOfTeachersAvailable = 0;
     public int maxNumberOfTeachersInSchool = 0;
 
+    private bool purchaseButtonVisible = false;
+    private GameObject canvas;
+    private Button purchaseButton;
+    private Button instance;
+
     void Awake()
     {
+        canvas = GameObject.Find("Canvas");
         textMesh = FindObjectOfType<TextMeshPro>();
+        if(!purchaseButton)
+        {
+            purchaseButton = Resources.Load<Button>("LoadablePrefabs/PurchaseButton");
+        }
     }
 
-    public void purchaseSchool(GameObject teacher)
+    private void purchaseSchool()
     {
         GameEvents.onResourceGained += this.onResourceGained;
         numberOfTeachersAvailable++;
-
+        isPurchased = true;
+        EventController.addEvent("School purchased");
+        Material activeSchoolMaterial = Resources.Load<Material>("LoadableMaterials/ActiveYellow");
+        Renderer currentMaterial = gameObject.GetComponent<Renderer>();
+        currentMaterial.material = activeSchoolMaterial;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -34,6 +48,41 @@ public class SchoolController : MonoBehaviour
         if(other.GetComponents<Unit>() != null)
         {
             EventController.addEvent("Unit in range");
+            
+            if(!isPurchased)
+            {
+                Vector2 screenPosition = Camera.main.WorldToScreenPoint(transform.position);
+                try
+                {
+                    instance = Instantiate(purchaseButton);
+                    instance.transform.SetParent(canvas.transform, false);
+                    instance.transform.position = screenPosition;
+                    instance.onClick.AddListener(purchaseButtonClicked);
+                    purchaseButtonVisible = true;
+                }
+                catch (System.Exception e)
+                {
+                    Debug.Log(e.Message);
+                }
+            }
+           // GameObject purchaseButton = GameObject.FindGameObjectWithTag("PurchaseButton");
+           
+           
+        }
+    }
+
+    public bool getPurchaseButtonVisible()
+    {
+        return purchaseButtonVisible;
+    }
+
+    private void purchaseButtonClicked()
+    {
+        purchaseSchool();
+        if (instance != null)
+        {
+            Destroy(instance.gameObject);
+            purchaseButtonVisible = false;
         }
     }
 
@@ -42,6 +91,11 @@ public class SchoolController : MonoBehaviour
         if (other.GetComponents<Unit>() != null)
         {
             EventController.addEvent("Unit exiting range");
+            if(!isPurchased && instance != null)
+            {
+                Destroy(instance.gameObject);
+                purchaseButtonVisible = false;
+            }
         }
     }
 
