@@ -269,9 +269,14 @@ public class Mouse : MonoBehaviour
 
         if((userIsDragging || finishedDragOnThisFrame) && unitsOnScreen.Count > 0)
         {
-            for(int i = 0; i < unitsOnScreen.Count; i ++)
+            for(int i = unitsOnScreen.Count -1; i >= 0; i--)
             {
                 GameObject unitObject = unitsOnScreen[i] as GameObject;
+                if (unitObject == null)
+                {
+                    unitsOnScreen.RemoveAt(i);
+                    break;
+                }
                 Unit unitScript = unitObject.GetComponent<Unit>();
                 GameObject selectedObject = unitObject.transform.Find("Selected").gameObject;
 
@@ -363,7 +368,7 @@ public class Mouse : MonoBehaviour
         }
     }
 
-    public void removeUnitFromCurrentlySelectedUnits(GameObject unit)
+    public static void removeUnitFromCurrentlySelectedUnits(GameObject unit)
     {
         if (currentlySelectedUnits.Count > 0)
         {

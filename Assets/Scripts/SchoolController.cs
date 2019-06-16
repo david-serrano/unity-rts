@@ -14,7 +14,6 @@ public class SchoolController : MonoBehaviour
     private TextMeshPro[] textMeshes;
     private TextMeshPro resourceCounter;
     private TextMeshPro teacherCount;
-    public int necessaryTeachersForPurchase = 0;
     public bool isPurchased = false;
     public int numberOfTeachersAvailable = 0;
     public int maxNumberOfTeachersInSchool = 0;
@@ -23,6 +22,7 @@ public class SchoolController : MonoBehaviour
     private GameObject canvas;
     private Button purchaseButton;
     private Button instance;
+    private GameObject purchasingUnit;
 
     void Awake()
     {
@@ -51,14 +51,23 @@ public class SchoolController : MonoBehaviour
 
     private void purchaseSchool()
     {
-        GameEvents.onResourceGained += this.onResourceGained;
-        numberOfTeachersAvailable++;
-        isPurchased = true;
-        EventController.addEvent("School purchased");
-        Material activeSchoolMaterial = Resources.Load<Material>("LoadableMaterials/ActiveYellow");
-        Renderer currentMaterial = gameObject.GetComponent<Renderer>();
-        currentMaterial.material = activeSchoolMaterial;
-        teacherCount.text = "Teachers: 0/5";
+        if (!isPurchased)
+        {
+            GameEvents.onResourceGained += this.onResourceGained;
+            numberOfTeachersAvailable++;
+            isPurchased = true;
+            EventController.addEvent("School purchased");
+            Material activeSchoolMaterial = Resources.Load<Material>("LoadableMaterials/ActiveYellow");
+            Renderer currentMaterial = gameObject.GetComponent<Renderer>();
+            currentMaterial.material = activeSchoolMaterial;
+            teacherCount.text = "Teachers: " + numberOfTeachersAvailable + "/" + maxNumberOfTeachersInSchool;
+            if (purchasingUnit != null)
+            {
+                Mouse.removeUnitFromCurrentlySelectedUnits(purchasingUnit);
+                Destroy(purchasingUnit);
+                purchasingUnit = null;
+            }
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -77,6 +86,7 @@ public class SchoolController : MonoBehaviour
                     instance.transform.position = screenPosition;
                     instance.onClick.AddListener(purchaseButtonClicked);
                     purchaseButtonVisible = true;
+                    purchasingUnit = other.gameObject;
                 }
                 catch (System.Exception e)
                 {
