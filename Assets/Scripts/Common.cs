@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class Common : MonoBehaviour
 {
+    public static void CopyTransform(Transform dst, Transform src)
+    {
+        dst.localPosition = src.localPosition;
+        dst.localRotation = src.localRotation;
+        dst.localScale = src.localScale;
+    }
+
     /**
      * General utility methods
      **/

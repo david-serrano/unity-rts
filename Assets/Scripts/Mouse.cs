@@ -98,6 +98,7 @@ public class Mouse : MonoBehaviour
                         }
                         else if (Input.GetMouseButtonUp(0) && DidUserClickLeftMouse(mouseDownPoint))
                         {
+                            closePanel();
                             if (!Common.shiftKeysDown())
                             {
                                 DeselectGameObjectsIfSelected();
@@ -121,52 +122,58 @@ public class Mouse : MonoBehaviour
                                     }
                                 }
                            
-                                    if (!unitAlreadyInCurrentlySelectedUnits(clickedObject))
+                                if (!unitAlreadyInCurrentlySelectedUnits(clickedObject))
+                                {
+                                    if (!Common.shiftKeysDown())
                                     {
-                                        if (!Common.shiftKeysDown())
-                                        {
-                                            DeselectGameObjectsIfSelected();
-                                        }
+                                        DeselectGameObjectsIfSelected();
+                                    }
 
-                                        selectGameObject(hit.collider.transform, clickedObject);
+                                    selectGameObject(hit.collider.transform, clickedObject);
 
-                                        if (controller != null && controller.getIsPurchased())
+                                    if (controller != null && controller.getIsPurchased())
+                                    {
+                                        if(panel!= null)
                                         {
-                                           if(panel!= null)
-                                            {
-                                                panel.GetComponentInChildren<Text>().text = "Summary for this school";
-                                                panel.GetComponentInChildren<Button>().onClick.AddListener(closePanel);
-                                                panel.SetActive(true);
+                                            panel.GetComponentInChildren<Text>().text = controller.getSummaryTextForSchool();
+                                            Button[] buttons = panel.GetComponentsInChildren<Button>();
+                                            for (int i =0;i<buttons.Length; i++) {
+                                                Button b = buttons[i];
+                                                if(b.name == "CloseButton")
+                                                {
+                                                    b.onClick.AddListener(closePanel);
+                                                } else if (b.name == "UnhouseButton")
+                                                {
+                                                    if(controller.numberOfTeachersAvailable > 0)
+                                                    {
+                                                        b.gameObject.SetActive(true);
+                                                        b.onClick.AddListener(delegate { unhouseTeacherButton(controller); });
+                                                    } else
+                                                    {
+                                                        b.gameObject.SetActive(false);
+                                                    }
+                                                  
+                                                }
                                             }
+                                            panel.SetActive(true);
                                         }
-
-                                       /* GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
-                                        selectedObject.SetActive(true);
-
-                                        currentlySelectedUnits.Add(clickedObject);
-                                        hit.collider.gameObject.GetComponent<Unit>().selected = true;
-                                        EventController.addEvent("Unit selected");*/
+                                    } else
+                                    {
+                                        closePanel();
+                                    }
+                                }
+                                else
+                                {
+                                    if (Common.shiftKeysDown())
+                                    {
+                                        removeUnitFromCurrentlySelectedUnits(clickedObject);
                                     }
                                     else
                                     {
-                                        if (Common.shiftKeysDown())
-                                        {
-                                            removeUnitFromCurrentlySelectedUnits(clickedObject);
-                                        }
-                                        else
-                                        {
-                                            DeselectGameObjectsIfSelected();
-                                            selectGameObject(hit.collider.transform, clickedObject);
-
-                                       /* GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
-                                            selectedObject.SetActive(true);
-
-                                            currentlySelectedUnits.Add(clickedObject);
-                                            hit.collider.gameObject.GetComponent<Unit>().selected = true;
-                                            EventController.addEvent("Unit selected");*/
-                                        }
+                                        DeselectGameObjectsIfSelected();
+                                        selectGameObject(hit.collider.transform, clickedObject);
                                     }
-                               // }
+                                }
                             }
                             else
                             {
@@ -251,6 +258,12 @@ public class Mouse : MonoBehaviour
         {
             panel.SetActive(false);
         }
+    }
+
+    private void unhouseTeacherButton(SchoolController controller)
+    {
+        closePanel();
+        controller.createUnit();
     }
 
     private void selectGameObject(Transform transform, GameObject clickedObject)

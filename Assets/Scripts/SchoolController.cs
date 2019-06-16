@@ -7,22 +7,30 @@ using UnityEngine.UI;
 
 public class SchoolController : MonoBehaviour
 {
-    public static int schoolPoints = 0;
     private float counter = 0;
     private float showingTime = 2;
     private bool isTextShowing = false;
     private TextMeshPro[] textMeshes;
     private TextMeshPro resourceCounter;
     private TextMeshPro teacherCount;
+    private GameObject canvas;
+
+    private bool purchaseButtonVisible = false;
+    private Button purchaseButton;
+    private Button purchaseButtonInstance;
+    private GameObject purchasingUnit;
+    private Transform purchasingUnitTransform;
+
+    private bool houseUnitButtonVisible = false;
+    private Button houseUnitButton;
+    private Button houseUnitButtonInstance;
+    private GameObject housedUnit;
+
+    public static int schoolPoints = 0;
+    public string schoolSummaryText = "Default school summary text";
     public bool isPurchased = false;
     public int numberOfTeachersAvailable = 0;
     public int maxNumberOfTeachersInSchool = 0;
-
-    private bool purchaseButtonVisible = false;
-    private GameObject canvas;
-    private Button purchaseButton;
-    private Button instance;
-    private GameObject purchasingUnit;
 
     void Awake()
     {
@@ -47,6 +55,10 @@ public class SchoolController : MonoBehaviour
         {
             purchaseButton = Resources.Load<Button>("LoadablePrefabs/PurchaseButton");
         }
+        if (!houseUnitButton)
+        {
+            houseUnitButton = Resources.Load<Button>("LoadablePrefabs/HouseUnitButton");
+        }
     }
 
     private void purchaseSchool()
@@ -60,14 +72,34 @@ public class SchoolController : MonoBehaviour
             Material activeSchoolMaterial = Resources.Load<Material>("LoadableMaterials/ActiveYellow");
             Renderer currentMaterial = gameObject.GetComponent<Renderer>();
             currentMaterial.material = activeSchoolMaterial;
-            teacherCount.text = "Teachers: " + numberOfTeachersAvailable + "/" + maxNumberOfTeachersInSchool;
+            updateTeacherCount();
             if (purchasingUnit != null)
             {
+                //FIXME copy by value not working
+                //initialise
+                if(!purchasingUnitTransform)
+                {
+                    purchasingUnitTransform = purchasingUnit.transform;
+                }
+                //copy by value
+                CopyTransform(purchasingUnitTransform, purchasingUnit.transform);
                 Mouse.removeUnitFromCurrentlySelectedUnits(purchasingUnit);
                 Destroy(purchasingUnit);
                 purchasingUnit = null;
             }
         }
+    }
+
+    void CopyTransform(Transform dst, Transform src)
+    {
+        dst.localPosition = src.localPosition;
+        dst.localRotation = src.localRotation;
+        dst.localScale = src.localScale;
+    }
+
+    private void updateTeacherCount()
+    {
+        teacherCount.text = "Teachers: " + numberOfTeachersAvailable + "/" + maxNumberOfTeachersInSchool;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -81,22 +113,48 @@ public class SchoolController : MonoBehaviour
                 Vector2 screenPosition = Camera.main.WorldToScreenPoint(transform.position);
                 try
                 {
-                    instance = Instantiate(purchaseButton);
-                    instance.transform.SetParent(canvas.transform, false);
-                    instance.transform.position = screenPosition;
-                    instance.onClick.AddListener(purchaseButtonClicked);
-                    purchaseButtonVisible = true;
+                    purchaseButtonInstance = Instantiate(purchaseButton);
+                    purchaseButtonInstance.transform.SetParent(canvas.transform, false);
+                    purchaseButtonInstance.transform.position = screenPosition;
+
                     purchasingUnit = other.gameObject;
+                    purchaseButtonInstance.onClick.AddListener(purchaseButtonClicked);
+                    purchaseButtonVisible = true;
                 }
                 catch (System.Exception e)
                 {
                     Debug.Log(e.Message);
                 }
-            }
-           // GameObject purchaseButton = GameObject.FindGameObjectWithTag("PurchaseButton");
-           
-           
+            } else if(numberOfTeachersAvailable < maxNumberOfTeachersInSchool)
+            {
+                Vector2 screenPosition = Camera.main.WorldToScreenPoint(transform.position);
+                try
+                {
+                    houseUnitButtonInstance = Instantiate(houseUnitButton);
+                    houseUnitButtonInstance.transform.SetParent(canvas.transform, false);
+                    houseUnitButtonInstance.transform.position = screenPosition;
+
+                    housedUnit = other.gameObject;
+                    houseUnitButtonInstance.onClick.AddListener(houseUnit);
+                    houseUnitButtonVisible = true;
+                }
+                catch (System.Exception e)
+                {
+                    Debug.Log(e.Message);
+                }
+            }           
         }
+    }
+
+    //TODO units should be held in a FIFO queue
+    private void houseUnit()
+    {
+        Destroy(houseUnitButtonInstance.gameObject);
+        houseUnitButtonVisible = false;
+
+        Destroy(housedUnit);
+        numberOfTeachersAvailable++;
+        updateTeacherCount();
     }
 
     public bool getIsPurchased()
@@ -111,15 +169,29 @@ public class SchoolController : MonoBehaviour
 
     public string getSummaryTextForSchool()
     {
-        return "Summary for school 1";
+        return schoolSummaryText;
+    }
+
+    public void createUnit()
+    {
+        if(numberOfTeachersAvailable > 0)
+        {
+            GameObject unit = Resources.Load<GameObject>("LoadablePrefabs/Character");
+            unit.transform.position = gameObject.transform.position;
+            // TODO this is broken because unit gets destroyed - 
+            // need to copy by value: purchasingUnitTransform.position;
+            numberOfTeachersAvailable--;
+            updateTeacherCount();
+            Instantiate(unit);
+        }
     }
 
     private void purchaseButtonClicked()
     {
         purchaseSchool();
-        if (instance != null)
+        if (purchaseButtonInstance != null)
         {
-            Destroy(instance.gameObject);
+            Destroy(purchaseButtonInstance.gameObject);
             purchaseButtonVisible = false;
         }
     }
@@ -129,10 +201,14 @@ public class SchoolController : MonoBehaviour
         if (other.GetComponents<Unit>() != null)
         {
             EventController.addEvent("Unit exiting range");
-            if(!isPurchased && instance != null)
+            if(!isPurchased && purchaseButtonInstance != null)
             {
-                Destroy(instance.gameObject);
+                Destroy(purchaseButtonInstance.gameObject);
                 purchaseButtonVisible = false;
+            } else if (houseUnitButtonInstance != null)
+            {
+                Destroy(houseUnitButtonInstance.gameObject);
+                houseUnitButtonVisible = false;
             }
         }
     }
@@ -157,13 +233,16 @@ public class SchoolController : MonoBehaviour
 
     void onResourceGained()
     {
-        EventController.addEvent("School point gained");
-        //Debug.Log("adding school point");
+        if(numberOfTeachersAvailable > 0)
+        {
+            EventController.addEvent("School point gained");
+            //Debug.Log("adding school point");
 
-        resourceCounter.text = "+1";
-        gameObject.GetComponentInChildren<Animation>().Play();
-        //resourceCounter.GetComponent<Animation>().Play("slide_up_and_fade");
-        schoolPoints++;
-        isTextShowing = true;
+            resourceCounter.text = "+1";
+            gameObject.GetComponentInChildren<Animation>().Play();
+            //resourceCounter.GetComponent<Animation>().Play("slide_up_and_fade");
+            schoolPoints++;
+            isTextShowing = true;
+        }
     }
 }

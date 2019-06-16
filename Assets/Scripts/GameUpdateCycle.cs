@@ -10,7 +10,7 @@ public class GameUpdateCycle : MonoBehaviour
 
     void Start()
     {
-        FloatingTextController.initialise();
+        //FloatingTextController.initialise();
     }
 
     void Update()
