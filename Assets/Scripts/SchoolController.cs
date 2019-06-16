@@ -11,7 +11,9 @@ public class SchoolController : MonoBehaviour
     private float counter = 0;
     private float showingTime = 2;
     private bool isTextShowing = false;
-    private TextMeshPro textMesh;
+    private TextMeshPro[] textMeshes;
+    private TextMeshPro resourceCounter;
+    private TextMeshPro teacherCount;
     public int necessaryTeachersForPurchase = 0;
     public bool isPurchased = false;
     public int numberOfTeachersAvailable = 0;
@@ -25,7 +27,22 @@ public class SchoolController : MonoBehaviour
     void Awake()
     {
         canvas = GameObject.Find("Canvas");
-        textMesh = FindObjectOfType<TextMeshPro>();
+        textMeshes = FindObjectsOfType<TextMeshPro>();
+        if(textMeshes.Length > 0)
+        {
+            for(int i = 0;i<textMeshes.Length;i++)
+            {
+                TextMeshPro currentIteration = textMeshes[i];
+                if(currentIteration.name == "ResourceCounter")
+                {
+                    resourceCounter = currentIteration;
+                } else if(currentIteration.name == "TeacherCount")
+                {
+                    teacherCount = currentIteration;
+                    teacherCount.text = "";
+                }
+            }
+        }
         if(!purchaseButton)
         {
             purchaseButton = Resources.Load<Button>("LoadablePrefabs/PurchaseButton");
@@ -41,6 +58,7 @@ public class SchoolController : MonoBehaviour
         Material activeSchoolMaterial = Resources.Load<Material>("LoadableMaterials/ActiveYellow");
         Renderer currentMaterial = gameObject.GetComponent<Renderer>();
         currentMaterial.material = activeSchoolMaterial;
+        teacherCount.text = "Teachers: 0/5";
     }
 
     private void OnTriggerEnter(Collider other)
@@ -81,6 +99,11 @@ public class SchoolController : MonoBehaviour
         return purchaseButtonVisible;
     }
 
+    public string getSummaryTextForSchool()
+    {
+        return "Summary for school 1";
+    }
+
     private void purchaseButtonClicked()
     {
         purchaseSchool();
@@ -110,8 +133,8 @@ public class SchoolController : MonoBehaviour
         {
             if (counter > showingTime)
             {
-                Debug.Log("counter reached, clearing");
-                textMesh.text = "";
+                //Debug.Log("counter reached, clearing");
+                resourceCounter.text = "";
                 counter = 0;
                 isTextShowing = false;
             }
@@ -125,9 +148,11 @@ public class SchoolController : MonoBehaviour
     void onResourceGained()
     {
         EventController.addEvent("School point gained");
-        Debug.Log("adding school point");
+        //Debug.Log("adding school point");
 
-        textMesh.text = "+1";
+        resourceCounter.text = "+1";
+        gameObject.GetComponentInChildren<Animation>().Play();
+        //resourceCounter.GetComponent<Animation>().Play("slide_up_and_fade");
         schoolPoints++;
         isTextShowing = true;
     }

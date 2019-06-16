@@ -129,15 +129,16 @@ public class Mouse : MonoBehaviour
                                         }
 
                                         selectGameObject(hit.collider.transform, clickedObject);
-                                    if(controller != null && controller.getIsPurchased())
-                                    {
-                                       if(panel!= null)
+
+                                        if (controller != null && controller.getIsPurchased())
                                         {
-                                            panel.GetComponentInChildren<Text>().text = "Summary for this school";
-                                            panel.GetComponentInChildren<Button>().onClick.AddListener(closePanel);
-                                            panel.SetActive(true);
+                                           if(panel!= null)
+                                            {
+                                                panel.GetComponentInChildren<Text>().text = "Summary for this school";
+                                                panel.GetComponentInChildren<Button>().onClick.AddListener(closePanel);
+                                                panel.SetActive(true);
+                                            }
                                         }
-                                    }
 
                                        /* GameObject selectedObject = hit.collider.transform.Find("Selected").gameObject;
                                         selectedObject.SetActive(true);
