@@ -167,6 +167,11 @@ public class SchoolController : MonoBehaviour
         return purchaseButtonVisible;
     }
 
+    public bool getHouseUnitButtonVisible()
+    {
+        return houseUnitButtonVisible;
+    }
+
     public string getSummaryTextForSchool()
     {
         return schoolSummaryText;
@@ -177,7 +182,8 @@ public class SchoolController : MonoBehaviour
         if(numberOfTeachersAvailable > 0)
         {
             GameObject unit = Resources.Load<GameObject>("LoadablePrefabs/Character");
-            unit.transform.position = gameObject.transform.position;
+            //x, y, z
+            unit.transform.position = new Vector3(gameObject.transform.position.x + 4  , 1.0f, gameObject.transform.position.z);// gameObject.transform.position + (gameObject.transform.right * 3);
             // TODO this is broken because unit gets destroyed - 
             // need to copy by value: purchasingUnitTransform.position;
             numberOfTeachersAvailable--;

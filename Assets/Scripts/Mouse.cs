@@ -36,6 +36,7 @@ public class Mouse : MonoBehaviour
 
     private GameObject canvas;
     private GameObject panel;
+    private Button unhouseUnitButton;
 
     private void Awake()
     {
@@ -116,7 +117,7 @@ public class Mouse : MonoBehaviour
                                 if (clickedObject.GetComponent<SchoolController>() != null)
                                 {
                                     controller = clickedObject.GetComponent<SchoolController>();
-                                    if (controller.getPurchaseButtonVisible())
+                                    if (controller.getPurchaseButtonVisible() || controller.getHouseUnitButtonVisible())
                                     {
                                         break;
                                     }
@@ -144,13 +145,18 @@ public class Mouse : MonoBehaviour
                                                     b.onClick.AddListener(closePanel);
                                                 } else if (b.name == "UnhouseButton")
                                                 {
-                                                    if(controller.numberOfTeachersAvailable > 0)
+                                                    if(!unhouseUnitButton)
                                                     {
-                                                        b.gameObject.SetActive(true);
-                                                        b.onClick.AddListener(delegate { unhouseTeacherButton(controller); });
+                                                        unhouseUnitButton = b;
+                                                    }
+
+                                                    if (controller.numberOfTeachersAvailable > 0)
+                                                    {
+                                                        unhouseUnitButton.gameObject.SetActive(true);
+                                                        unhouseUnitButton.onClick.AddListener(delegate { unhouseTeacherButton(controller); });
                                                     } else
                                                     {
-                                                        b.gameObject.SetActive(false);
+                                                        unhouseUnitButton.gameObject.SetActive(false);
                                                     }
                                                   
                                                 }
@@ -354,8 +360,11 @@ public class Mouse : MonoBehaviour
             for (int i = 0; i < currentlySelectedUnits.Count; i++)
             {
                 GameObject unitAtIndex = currentlySelectedUnits[i] as GameObject;
-                unitAtIndex.transform.Find("Selected").gameObject.SetActive(false);
-                unitAtIndex.GetComponent<Unit>().selected = false;
+                if(unitAtIndex != null)
+                {
+                    unitAtIndex.transform.Find("Selected").gameObject.SetActive(false);
+                    unitAtIndex.GetComponent<Unit>().selected = false;
+                }
             }
             currentlySelectedUnits.Clear();
         }
